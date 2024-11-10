@@ -1,0 +1,9 @@
+# requirements.txt
+
+    'pandas',
+    'numpy',
+    'matplotlib',
+    'seaborn',
+    'statsmodels',
+    'scipy',
+    'xlsxwriter'

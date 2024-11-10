@@ -1,0 +1,8 @@
+# Ignore compiled Python files
+__pycache__/
+*.pyc
+
+# Distribution/build directories
+dist/
+build/
+*.egg-info/
