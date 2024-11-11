@@ -84,8 +84,8 @@ event_study/
 ├── regression_models.py
 ├── car_calculations.py
 └── main.py
-setup.py
-requirements.txt
+├─ setup.py
+└─ requirements.txt
 ```
 
 ## Contributing
