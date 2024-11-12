@@ -62,7 +62,7 @@ def run_event_study(models_to_use=None, event_window_days=1, estimation_window_d
             all_event_data.append(merged_event)
 
     if not summary_results:
-        print("没有找到有效的事件结果。")
+        print("No valid event results were found.")
         return
 
     summary_df = pd.DataFrame(summary_results)
