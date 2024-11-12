@@ -1,6 +1,6 @@
 # Event Study Analysis Package
 
-An event study analysis package for conducting financial event studies using various models and statistical tests.
+**An event study analysis package for conducting financial event studies using various models and statistical tests.** Considering the inadequacy of the R package in date format reading, this tool was developed based on Python
 
 ## Overview
 This Python package allows users to perform event study analyses on financial data. It supports multiple models, including the Market Model, Market-Adjusted Model, and Fama-French Factor Models (3-Factor, 4-Factor, and 5-Factor models). Users can specify the event window, estimation window, and choose whether to generate visualizations.
