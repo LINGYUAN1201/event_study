@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="event_study",
-    version="0.1.0",
+    version="0.1.1",
     author="LING YUAN",
     author_email="LingYUAN1201@outlook.com",
     description="A Python package for conducting event studies with CAR and AR calculations.",

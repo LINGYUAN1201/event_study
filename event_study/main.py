@@ -1,5 +1,3 @@
-# event_study/main.py
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,7 +9,8 @@ from event_study.statistical_tests import run_tests
 
 warnings.filterwarnings("ignore")
 
-def run_event_study(models_to_use=None, event_window_days=1, estimation_window_days=250,
+
+def run_event_study(models_to_use=None, event_window_days=(-1, 1), estimation_window_days=250,
                     generate_plots=True, event_file='Event.xlsx', firm_file='Firm.xlsx',
                     market_file='Market.xlsx', ff_factors_file='FF factor.xlsx'):
     """
@@ -19,7 +18,7 @@ def run_event_study(models_to_use=None, event_window_days=1, estimation_window_d
 
     参数：
     - models_to_use：要使用的模型列表。
-    - event_window_days：事件窗口大小。
+    - event_window_days：事件窗口大小（区间，如 (-1, 1) 表示 [前 1 天，后 1 天]）。
     - estimation_window_days：估计窗口大小。
     - generate_plots：是否生成可视化结果。
     - event_file：事件数据文件路径。
@@ -30,7 +29,7 @@ def run_event_study(models_to_use=None, event_window_days=1, estimation_window_d
     if models_to_use is None:
         models_to_use = ['MarketModel', 'MarketAdjusted', '3F', '4F', '5F']
 
-    # 加载数据，使用指定的文件路径
+    # 加载数据
     event_data, firm_data, market_data, ff_factors = load_data(
         event_file=event_file,
         firm_file=firm_file,
@@ -51,7 +50,7 @@ def run_event_study(models_to_use=None, event_window_days=1, estimation_window_d
             firm_data=firm_data,
             market_data=market_data,
             ff_factors=ff_factors,
-            event_window_days=event_window_days,
+            event_window_days=event_window_days,  # 传入事件窗口范围
             estimation_window_days=estimation_window_days,
             models_to_use=models_to_use
         )
@@ -62,7 +61,7 @@ def run_event_study(models_to_use=None, event_window_days=1, estimation_window_d
             all_event_data.append(merged_event)
 
     if not summary_results:
-        print("No valid event results were found.")
+        print("没有找到有效的事件结果。")
         return
 
     summary_df = pd.DataFrame(summary_results)
@@ -162,13 +161,13 @@ def run_event_study(models_to_use=None, event_window_days=1, estimation_window_d
         for plot_model in plot_models:
             model = plot_model['model']
             ar_col = f'AbnormalReturn_{model}'
-            plt.figure(figsize=(10,6))
+            plt.figure(figsize=(10, 6))
             sns.lineplot(data=average_AR_per_day, x='EventDay', y=ar_col, color=plot_model['color'], marker='o')
             plt.title(plot_model['title'], fontsize=14, fontweight='bold')
             plt.xlabel("Event Day (Relative to Event Date)", fontsize=12)
             plt.ylabel("Average Abnormal Return (AR)", fontsize=12)
             plt.axvline(x=0, linestyle='--', color='gray')
-            plt.xticks(ticks=range(-event_window_days, event_window_days + 1))
+            plt.xticks(ticks=range(event_window_days[0], event_window_days[1] + 1))
             plt.grid(True, which='both', linestyle='--', linewidth=0.5)
             plt.tight_layout()
             plt.savefig(f"AR_{model}.png")

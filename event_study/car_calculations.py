@@ -9,10 +9,15 @@ def calculate_CAR_AR(symbol, event_date, firm_data, market_data, ff_factors, eve
     """
     对于每个事件，计算CAR和AR，执行统计检验，并返回结果。
     """
+
+    event_window_start, event_window_end = event_window_days
+
+
     estimation_start = event_date - timedelta(days=estimation_window_days)
     estimation_end = event_date - timedelta(days=1)
-    event_start = event_date - timedelta(days=event_window_days)
-    event_end = event_date + timedelta(days=event_window_days)
+    event_start = event_date + timedelta(days=event_window_start)
+    event_end = event_date + timedelta(days=event_window_end)
+
 
     firm_estimation = firm_data[
         (firm_data['Stkcd'] == symbol) &
@@ -36,7 +41,9 @@ def calculate_CAR_AR(symbol, event_date, firm_data, market_data, ff_factors, eve
     if len(merged_estimation) < estimation_window_days * 0.8:
         return None
 
+
     models = perform_regressions(merged_estimation, models_to_use)
+
 
     firm_event = firm_data[
         (firm_data['Stkcd'] == symbol) &
@@ -60,7 +67,9 @@ def calculate_CAR_AR(symbol, event_date, firm_data, market_data, ff_factors, eve
     if merged_event.empty:
         return None
 
+
     merged_event = calculate_abnormal_returns(models, merged_event, models_to_use)
+
 
     merged_event['EventDay'] = (merged_event['Date'] - event_date).dt.days
 
@@ -73,19 +82,19 @@ def calculate_CAR_AR(symbol, event_date, firm_data, market_data, ff_factors, eve
 
     test_results = {}
     for model in models_to_use:
-        # CAR检验
+
         car_col = f'CAR_{model}'
         car_values = merged_event[car_col].dropna().values
         car_mean = np.mean(car_values)
         car_tests = run_tests(car_values)
 
-        # AR检验
+
         ar_col = f'AbnormalReturn_{model}'
         ar_values = merged_event[ar_col].dropna().values
         ar_mean = np.mean(ar_values)
         ar_tests = run_tests(ar_values)
 
-        # 记录结果
+
         test_results[f'AvgCAR_{model}'] = car_mean
         test_results[f't_statistic_{model}'] = car_tests.get('t_statistic', np.nan)
         test_results[f't_p_value_{model}'] = car_tests.get('t_p_value', np.nan)
@@ -106,7 +115,7 @@ def calculate_CAR_AR(symbol, event_date, firm_data, market_data, ff_factors, eve
         test_results[f'permutation_statistic_AR_{model}'] = ar_tests.get('permutation_statistic', np.nan)
         test_results[f'permutation_p_value_AR_{model}'] = ar_tests.get('permutation_p_value', np.nan)
 
-    # 事件窗口最后一天的CAR
+
     last_day = merged_event['EventDay'].max()
     last_day_data = merged_event[merged_event['EventDay'] == last_day]
     last_day_tests = {}
