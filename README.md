@@ -52,7 +52,7 @@ from event_study.main import run_event_study
 
 # Specify parameters
 models_to_use = ['MarketModel', 'MarketAdjusted', '3F', '4F', '5F']  # Models to use
-event_window_days = 1  # Event window size (e.g., 1 for [-1, +1] window)
+event_window_days = (-1, 4)  # Event window size
 estimation_window_days = 250  # Estimation window size
 generate_plots = True  # Whether to generate AR trend plots
 
