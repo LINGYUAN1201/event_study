@@ -21,7 +21,7 @@ This Python package allows users to perform event study analyses on financial da
 You can install the package directly from GitHub using `pip`:
 
 ```python
-pip install git+https://github.com/your_username/event_study.git
+pip install git+https://github.com/LingYUAN1201/event_study.git
 ```
 
 ### Requirements
