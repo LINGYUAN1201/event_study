@@ -7,13 +7,14 @@ This Python package allows users to perform event study analyses on financial da
 
 ## Features
 - **Multiple Models**: Supports Market Model, Market-Adjusted Model, and Fama-French 3F, 4F, and 5F models.
-- **Statistical Tests**: Performs t-tests, Wilcoxon signed-rank test, Binomial sign test, and Permutation test.
+- **Statistical Tests**: Performs T-test_statistic、T-test_p_value、Patell_Z_test_statistic、Patell_Z_test_p_value、Wilcoxon_signed_rank_test_statistic、Wilcoxon_signed_rank_test_p_value、Binomial_sign_test_statistic、Binomial_sign_test_p_value、Permutation_test_statistic、Permutation_test_p_value、Corrado_signed_rank_test_statistic、Corrado_signed_rank_test_p_value.
 - **Customizable Parameters**: Users can specify models to use, event window size, estimation window size, and more.
 - **Visualization**: Optionally generate and save plots of Average Abnormal Returns (AR) over the event window.
 - **Output Files**:
     - `event_study_individual_CAR_results_with_tests.xlsx`: Contains average cumulative abnormal returns (CAR) and statistical test results for each event.
     - `event_study_CAR_last_day_tests.xlsx`: Contains CAR on the last day of the event window for each event.
     - `event_study_daily_AR_results_with_tests.xlsx`: Contains average AR and statistical test results for each event day.
+    - `event_study_individual_CAR_results_with_tests.xlsx`: Contains the average cumulative abnormal return (CAR) and statistical test results for each event.
     - AR trend plots for each model (e.g., AR_MarketModel.png).
 
 ## Installation
