@@ -1,5 +1,3 @@
-# event_study/car_calculations.py
-
 import numpy as np
 from datetime import timedelta
 from .regression_models import perform_regressions, calculate_abnormal_returns
@@ -12,12 +10,10 @@ def calculate_CAR_AR(symbol, event_date, firm_data, market_data, ff_factors, eve
 
     event_window_start, event_window_end = event_window_days
 
-
     estimation_start = event_date - timedelta(days=estimation_window_days)
     estimation_end = event_date - timedelta(days=1)
     event_start = event_date + timedelta(days=event_window_start)
     event_end = event_date + timedelta(days=event_window_end)
-
 
     firm_estimation = firm_data[
         (firm_data['Stkcd'] == symbol) &
@@ -41,9 +37,7 @@ def calculate_CAR_AR(symbol, event_date, firm_data, market_data, ff_factors, eve
     if len(merged_estimation) < estimation_window_days * 0.8:
         return None
 
-
     models = perform_regressions(merged_estimation, models_to_use)
-
 
     firm_event = firm_data[
         (firm_data['Stkcd'] == symbol) &
@@ -67,12 +61,9 @@ def calculate_CAR_AR(symbol, event_date, firm_data, market_data, ff_factors, eve
     if merged_event.empty:
         return None
 
-
     merged_event = calculate_abnormal_returns(models, merged_event, models_to_use)
 
-
     merged_event['EventDay'] = (merged_event['Date'] - event_date).dt.days
-
     merged_event = merged_event.sort_values('EventDay')
 
     for model in models_to_use:
@@ -81,19 +72,18 @@ def calculate_CAR_AR(symbol, event_date, firm_data, market_data, ff_factors, eve
         merged_event[car_col] = merged_event[ar_col].cumsum()
 
     test_results = {}
-    for model in models_to_use:
+    daily_car_test_results = {}
 
+    for model in models_to_use:
         car_col = f'CAR_{model}'
         car_values = merged_event[car_col].dropna().values
         car_mean = np.mean(car_values)
         car_tests = run_tests(car_values)
 
-
         ar_col = f'AbnormalReturn_{model}'
         ar_values = merged_event[ar_col].dropna().values
         ar_mean = np.mean(ar_values)
         ar_tests = run_tests(ar_values)
-
 
         test_results[f'AvgCAR_{model}'] = car_mean
         test_results[f't_statistic_{model}'] = car_tests.get('t_statistic', np.nan)
@@ -115,6 +105,33 @@ def calculate_CAR_AR(symbol, event_date, firm_data, market_data, ff_factors, eve
         test_results[f'permutation_statistic_AR_{model}'] = ar_tests.get('permutation_statistic', np.nan)
         test_results[f'permutation_p_value_AR_{model}'] = ar_tests.get('permutation_p_value', np.nan)
 
+        # Calculate daily average CAR and its tests
+        daily_car_means = merged_event.groupby('EventDay')[car_col].mean()
+        
+        daily_car_test_results[f'daily_avgCAR_{model}_means'] = daily_car_means.to_dict()
+        daily_car_test_results[f'daily_avgCAR_{model}_tests'] = {}
+
+        for day, mean_car in daily_car_means.items():
+            if not isinstance(mean_car, float) or not np.isnan(mean_car):
+                car_values_for_day = merged_event[merged_event['EventDay'] == day][car_col].dropna().values
+                if len(car_values_for_day) >= 2:
+                    car_tests_for_day = run_tests(car_values_for_day)
+                    daily_car_test_results[f'daily_avgCAR_{model}_tests'][day] = car_tests_for_day
+                else:
+                    daily_car_test_results[f'daily_avgCAR_{model}_tests'][day] = {
+                        't_statistic': np.nan,
+                        't_p_value': np.nan,
+                        'patell_statistic': np.nan,
+                        'patell_p_value': np.nan,
+                        'wilcoxon_statistic': np.nan,
+                        'wilcoxon_p_value': np.nan,
+                        'binomial_statistic': np.nan,
+                        'binomial_p_value': np.nan,
+                        'permutation_statistic': np.nan,
+                        'permutation_p_value': np.nan,
+                        'corrado_statistic': np.nan,
+                        'corrado_p_value': np.nan
+                    }
 
     last_day = merged_event['EventDay'].max()
     last_day_data = merged_event[merged_event['EventDay'] == last_day]
@@ -134,5 +151,6 @@ def calculate_CAR_AR(symbol, event_date, firm_data, market_data, ff_factors, eve
     }
     result.update(test_results)
     result.update(last_day_tests)
+    result.update(daily_car_test_results)
 
     return result, merged_event

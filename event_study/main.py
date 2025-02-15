@@ -9,7 +9,6 @@ from event_study.statistical_tests import run_tests
 
 warnings.filterwarnings("ignore")
 
-
 def run_event_study(models_to_use=None, event_window_days=(-1, 1), estimation_window_days=250,
                     generate_plots=True, event_file='Event.xlsx', firm_file='Firm.xlsx',
                     market_file='Market.xlsx', ff_factors_file='FF factor.xlsx'):
@@ -71,34 +70,46 @@ def run_event_study(models_to_use=None, event_window_days=(-1, 1), estimation_wi
         for model in models_to_use:
             cols = ['Symbol', 'EventDate',
                     f'AvgCAR_{model}', f't_statistic_{model}', f't_p_value_{model}',
-                    f'binomial_statistic_{model}', f'binomial_p_value_{model}',
+                    f'patell_statistic_{model}', f'patell_p_value_{model}',
                     f'wilcoxon_statistic_{model}', f'wilcoxon_p_value_{model}',
+                    f'binomial_statistic_{model}', f'binomial_p_value_{model}',
                     f'permutation_statistic_{model}', f'permutation_p_value_{model}',
+                    f'corrado_statistic_{model}', f'corrado_p_value_{model}',
                     f'AvgAR_{model}', f't_statistic_AR_{model}', f't_p_value_AR_{model}',
-                    f'binomial_statistic_AR_{model}', f'binomial_p_value_AR_{model}',
+                    f'patell_statistic_AR_{model}', f'patell_p_value_AR_{model}',
                     f'wilcoxon_statistic_AR_{model}', f'wilcoxon_p_value_AR_{model}',
-                    f'permutation_statistic_AR_{model}', f'permutation_p_value_AR_{model}']
+                    f'binomial_statistic_AR_{model}', f'binomial_p_value_AR_{model}',
+                    f'permutation_statistic_AR_{model}', f'permutation_p_value_AR_{model}',
+                    f'corrado_statistic_AR_{model}', f'corrado_p_value_AR_{model}']
             existing_cols = [col for col in cols if col in summary_df.columns]
             model_df = summary_df[existing_cols].copy()
             model_df.rename(columns={
                 f'AvgCAR_{model}': 'AvgCAR',
                 f't_statistic_{model}': 't_statistic',
                 f't_p_value_{model}': 't_p_value',
-                f'binomial_statistic_{model}': 'UnivariateSign_statistic',
-                f'binomial_p_value_{model}': 'UnivariateSign_p_value',
+                f'patell_statistic_{model}': 'Patell_statistic',
+                f'patell_p_value_{model}': 'Patell_p_value',
                 f'wilcoxon_statistic_{model}': 'Wilcoxon_statistic',
                 f'wilcoxon_p_value_{model}': 'Wilcoxon_p_value',
-                f'permutation_statistic_{model}': 'SignTest_statistic',
-                f'permutation_p_value_{model}': 'SignTest_p_value',
+                f'binomial_statistic_{model}': 'Binomial_statistic',
+                f'binomial_p_value_{model}': 'Binomial_p_value',
+                f'permutation_statistic_{model}': 'Permutation_statistic',
+                f'permutation_p_value_{model}': 'Permutation_p_value',
+                f'corrado_statistic_{model}': 'Corrado_statistic',
+                f'corrado_p_value_{model}': 'Corrado_p_value',
                 f'AvgAR_{model}': 'AvgAR',
                 f't_statistic_AR_{model}': 't_statistic_AR',
                 f't_p_value_AR_{model}': 't_p_value_AR',
-                f'binomial_statistic_AR_{model}': 'UnivariateSign_statistic_AR',
-                f'binomial_p_value_AR_{model}': 'UnivariateSign_p_value_AR',
+                f'patell_statistic_AR_{model}': 'Patell_statistic_AR',
+                f'patell_p_value_AR_{model}': 'Patell_p_value_AR',
                 f'wilcoxon_statistic_AR_{model}': 'Wilcoxon_statistic_AR',
                 f'wilcoxon_p_value_AR_{model}': 'Wilcoxon_p_value_AR',
-                f'permutation_statistic_AR_{model}': 'SignTest_statistic_AR',
-                f'permutation_p_value_AR_{model}': 'SignTest_p_value_AR'
+                f'binomial_statistic_AR_{model}': 'Binomial_statistic_AR',
+                f'binomial_p_value_AR_{model}': 'Binomial_p_value_AR',
+                f'permutation_statistic_AR_{model}': 'Permutation_statistic_AR',
+                f'permutation_p_value_AR_{model}': 'Permutation_p_value_AR',
+                f'corrado_statistic_AR_{model}': 'Corrado_statistic_AR',
+                f'corrado_p_value_AR_{model}': 'Corrado_p_value_AR'
             }, inplace=True)
             model_df.to_excel(writer, sheet_name=model, index=False)
 
@@ -137,15 +148,59 @@ def run_event_study(models_to_use=None, event_window_days=(-1, 1), estimation_wi
             test_df.rename(columns={
                 't_statistic': 't_statistic',
                 't_p_value': 't_p_value',
-                'binomial_statistic': 'UnivariateSign_statistic',
-                'binomial_p_value': 'UnivariateSign_p_value',
+                'patell_statistic': 'Patell_statistic',
+                'patell_p_value': 'Patell_p_value',
                 'wilcoxon_statistic': 'Wilcoxon_statistic',
                 'wilcoxon_p_value': 'Wilcoxon_p_value',
-                'permutation_statistic': 'SignTest_statistic',
-                'permutation_p_value': 'SignTest_p_value'
+                'binomial_statistic': 'Binomial_statistic',
+                'binomial_p_value': 'Binomial_p_value',
+                'permutation_statistic': 'Permutation_statistic',
+                'permutation_p_value': 'Permutation_p_value',
+                'corrado_statistic': 'Corrado_statistic',
+                'corrado_p_value': 'Corrado_p_value'
             }, inplace=True)
 
             test_df.to_excel(writer, sheet_name=f'{model}_AR', index=False)
+
+    # 保存每日平均CAR及其测试结果
+    car_cols = {f'CAR_{model}': 'mean' for model in models_to_use}
+    average_CAR_per_day = combined_event_data.groupby('EventDay').agg(car_cols).reset_index()
+
+    with pd.ExcelWriter("event_study_daily_CAR_results_with_tests.xlsx", engine='xlsxwriter') as writer:
+        for model in models_to_use:
+            car_col = f'CAR_{model}'
+            car_grouped = combined_event_data.groupby('EventDay')[car_col]
+
+            test_results = []
+            for day, group in car_grouped:
+                data = group.dropna().values
+                if len(data) > 0:
+                    tests = run_tests(data)
+                else:
+                    tests = {}
+                result = {'EventDay': day, 'AvgCAR': average_CAR_per_day.loc[average_CAR_per_day['EventDay'] == day, car_col].values[0]}
+                for key, value in tests.items():
+                    result[f'{key}'] = value
+                test_results.append(result)
+
+            test_df = pd.DataFrame(test_results)
+
+            test_df.rename(columns={
+                't_statistic': 't_statistic',
+                't_p_value': 't_p_value',
+                'patell_statistic': 'Patell_statistic',
+                'patell_p_value': 'Patell_p_value',
+                'wilcoxon_statistic': 'Wilcoxon_statistic',
+                'wilcoxon_p_value': 'Wilcoxon_p_value',
+                'binomial_statistic': 'Binomial_statistic',
+                'binomial_p_value': 'Binomial_p_value',
+                'permutation_statistic': 'Permutation_statistic',
+                'permutation_p_value': 'Permutation_p_value',
+                'corrado_statistic': 'Corrado_statistic',
+                'corrado_p_value': 'Corrado_p_value'
+            }, inplace=True)
+
+            test_df.to_excel(writer, sheet_name=f'{model}_CAR', index=False)
 
     # 可视化部分
     if generate_plots:
